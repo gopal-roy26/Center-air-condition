@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="bn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Air Conditioning System</title>
+    <style>
+        /* প্রিমিয়াম অ্যানিমেটেড ব্যাকগ্রাউন্ড */
+        body {
+            margin: 0;
+            padding: 0;
+            /* একটি সুন্দর ধীর গতির গ্রেডিয়েন্ট অ্যানিমেশন */
+            background: linear-gradient(-45deg, #f8f9fa, #e9ecef, #dee2e6, #f1f3f5);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #333;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* ডাইনামিক প্রোগ্রেস বার (উপরে) */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 50;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #0056b3;
+            width: 16.66%;
+            /* ৬টি স্লাইডের জন্য প্রথম স্লাইডের অনুপাত */
+            transition: width 0.5s ease-in-out;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ফুলস্ক্রিন বাটন - গ্লাস ইফেক্ট */
+        .fullscreen-btn {
+            position: absolute;
+            top: 25px;
+            right: 30px;
+            z-index: 30;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #495057;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .fullscreen-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .slides {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+        }
+
+        /* স্মুথ থ্রিডি জুম অ্যানিমেশন */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            /* ছবি প্রথমে একটু ছোট থাকবে (scale 0.95), তারপর বড় হবে */
+            transform: scale(0.95);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 90px;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            /* অরিজিনাল সাইজে আসবে */
+            z-index: 10;
+        }
+
+        .slide img,
+        .slide iframe {
+            max-width: 100%;
+            max-height: 92%;
+            object-fit: contain;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+            /* আরও প্রফেশনাল শ্যাডো */
+            border-radius: 16px;
+            background-color: white;
+        }
+
+        .slide iframe {
+            width: 100%;
+            height: 92%;
+            border: none;
+        }
+
+        /* সিমুলেশনের জন্য ফুলস্ক্রিন স্টাইল */
+        .slide.simulation-slide {
+            padding: 0;
+        }
+
+        .slide.simulation-slide iframe {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* নেভিগেশন বাটন */
+        .controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            z-index: 20;
+            padding: 0 30px;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        .btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #333;
+            font-size: 20px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background: white;
+            transform: scale(1.15);
+            color: #0056b3;
+        }
+
+        /* নিচের প্রোগ্রেস ডট */
+        .indicators {
+            position: absolute;
+            bottom: 25px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            z-index: 20;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .dot:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .dot.active {
+            background: #0056b3;
+            width: 25px;
+            /* অ্যাকটিভ ডটটি একটু লম্বা হবে (মডার্ন ডিজাইন) */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 86, 179, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ডাইনামিক প্রোগ্রেস বার -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="slider-container" id="sliderContainer">
+        <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+
+        <div class="slides">
+            <!-- প্রথম স্লাইড -->
+            <div class="slide active">
+                <img src="slide1.jpg" alt="Central AC - Step 1">
+            </div>
+
+            <!-- নতুন যুক্ত করা সিমুলেশন স্লাইড (ফুল ডিসপ্লে) -->
+            <div class="slide simulation-slide">
+                <iframe src="https://center-air-conditioning-system.vercel.app/" title="Simulation"
+                    allowfullscreen></iframe>
+            </div>
+
+            <!-- বাকি স্লাইডগুলো -->
+            <div class="slide">
+                <img src="slide2.png" alt="Central AC - Step 2">
+            </div>
+            <div class="slide">
+                <img src="slide3.png" alt="Central AC - Step 3">
+            </div>
+            <div class="slide">
+                <img src="slide4.png" alt="Central AC - Step 4">
+            </div>
+            <div class="slide">
+                <img src="slide5.png" alt="Central AC - Step 5">
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="btn" onclick="changeSlide(-1)">❮</div>
+            <div class="btn" onclick="changeSlide(1)">❯</div>
+        </div>
+
+        <div class="indicators">
+            <div class="dot active" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+            <div class="dot" onclick="goToSlide(2)"></div>
+            <div class="dot" onclick="goToSlide(3)"></div>
+            <div class="dot" onclick="goToSlide(4)"></div>
+            <div class="dot" onclick="goToSlide(5)"></div> <!-- নতুন ৬ষ্ঠ ডট -->
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+        const progressBar = document.getElementById('progressBar');
+
+        function showSlide(index) {
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+
+            // সব স্লাইড এবং ডট রিমুভ করা
+            slides.forEach(slide => slide.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+
+            // অ্যাকটিভ স্লাইড এবং ডট সেট করা
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+
+            // প্রোগ্রেস বার আপডেট করা
+            const progressPercentage = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = progressPercentage + '%';
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        // কিবোর্ড নেভিগেশন 
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                changeSlide(1);
+            } else if (event.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // ফুলস্ক্রিন ফাংশন
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
